@@ -1,0 +1,197 @@
+{
+ "_source": "The paper's tables (accuracy: Recall@10 etc. on ScreenMemEval; latency: mean seconds per screenshot on an AWS mac2-m2pro (Apple M2 Pro, 32 GB), GPU = Metal fp16, CPU = fp32 with 8 threads).",
+ "rows": [
+  {
+   "row": "Text index (OCR + BM25, fine-tuned)",
+   "arm": "ocr",
+   "preset": "ocr",
+   "R10": [78.62, 78.65, 53.21],
+   "single_R10": [84.41, 81.14, 54.72],
+   "multi_R10": [49.44, 59.95, 37.05],
+   "nDCG": [71.27, 68.65, 38.29],
+   "latency_gpu": [0.6151, 0.6502, 0.6944]
+  },
+  {
+   "row": "Screenshot (zero-shot)",
+   "arm": "base",
+   "preset": "full",
+   "R10": [
+    81.4,
+    82.28,
+    58.57
+   ],
+   "single_R10": [
+    87.57,
+    85.17,
+    60.46
+   ],
+   "multi_R10": [
+    50.29,
+    60.5,
+    38.31
+   ],
+   "nDCG": [
+    73.84,
+    72.17,
+    44.5
+   ]
+  },
+  {
+   "row": "Screenshot (LoRA fine-tuned)",
+   "arm": "lora",
+   "preset": "full",
+   "R10": [
+    83.38,
+    84.51,
+    58.24
+   ],
+   "single_R10": [
+    89.17,
+    87.27,
+    59.85
+   ],
+   "multi_R10": [
+    54.19,
+    63.69,
+    40.91
+   ],
+   "nDCG": [
+    76.27,
+    74.73,
+    44.85
+   ],
+   "latency_gpu": [
+    2.3333,
+    2.3424,
+    2.3413
+   ],
+   "latency_cpu": [
+    5.4235,
+    5.4683,
+    5.8087
+   ]
+  },
+  {
+   "row": "+ Linear patch embed.",
+   "arm": "lora",
+   "preset": "full+pe",
+   "same_vectors_as": "Screenshot (LoRA fine-tuned)",
+   "latency_gpu": [
+    1.6523,
+    1.644,
+    1.6551
+   ],
+   "latency_cpu": [
+    5.4235,
+    5.4683,
+    5.8087
+   ]
+  },
+  {
+   "row": "+ Spatial pruning",
+   "arm": "lora",
+   "preset": "S+G",
+   "R10": [
+    82.8,
+    83.78,
+    57.12
+   ],
+   "latency_gpu": [
+    1.0025,
+    1.1711,
+    1.0806
+   ],
+   "latency_cpu": [
+    2.9638,
+    3.636,
+    3.4755
+   ]
+  },
+  {
+   "row": "w/o Grid Keep",
+   "arm": "lora",
+   "preset": "S",
+   "R10": [
+    82.61,
+    83.48,
+    55.19
+   ],
+   "latency_gpu": [
+    0.8417,
+    1.0306,
+    0.9079
+   ],
+   "latency_cpu": [
+    2.4862,
+    3.0712,
+    2.6043
+   ]
+  },
+  {
+   "row": "+ Temporal reuse",
+   "arm": "lora",
+   "preset": "S+G+T+L",
+   "R10": [
+    81.79,
+    82.86,
+    56.17
+   ],
+   "latency_gpu": [
+    0.6612,
+    0.844,
+    0.6268
+   ],
+   "latency_cpu": [
+    1.9662,
+    2.6056,
+    1.8696
+   ]
+  },
+  {
+   "row": "+ Consistency adapter = StreamEmbed",
+   "arm": "adapter",
+   "preset": "S+G+T+L",
+   "R10": [
+    82.14,
+    83.3,
+    57.63
+   ],
+   "single_R10": [
+    88.09,
+    86.08,
+    59.37
+   ],
+   "multi_R10": [
+    52.13,
+    62.37,
+    38.96
+   ],
+   "nDCG": [
+    75.47,
+    73.88,
+    43.76
+   ],
+   "latency_gpu": [
+    0.6612,
+    0.844,
+    0.6268
+   ],
+   "latency_cpu": [
+    1.9662,
+    2.6056,
+    1.8696
+   ]
+  }
+ ],
+ "notes": [
+  "The paper encoded the accuracy streams on CUDA in bf16; streamembed runs fp16 on GPUs, which can move Recall@10 slightly.",
+  "The paper's CPU timings used torch.compile and bf16 ViT weight storage, which streamembed does not; expect slower CPU numbers.",
+  "The CPU rows skip `full`: the paper reports the full screenshot on the CPU with the linear patch embedding (`full+pe`), which gives the same vectors.",
+  "Text index: Apple Vision OCR (on the Neural Engine, so it has no CPU time), the OCR texts embedded with Qwen3-VL-Embedding-2B and the OCR LoRA, fused with BM25 by RRF (k 10, BM25 weight 0.5). Its latency is the OCR plus the text embedding."
+ ],
+ "configs": [
+  "sme-h1",
+  "sme-h2",
+  "sme-agent"
+ ]
+}

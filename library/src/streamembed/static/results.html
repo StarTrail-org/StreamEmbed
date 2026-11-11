@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap">
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #f6f5f2; --bar: #fdfcfa; --fg: #1c1c1a; --muted: #6d6c66; --faint: #9a998f; --line: #e3e1db; --line-strong: #cfccc4;
+  --card: #ffffff; --well: #ecebe6; --accent: #2b59c3; --accent-fg: #ffffff; --accent-soft: #e7edfb;
+  --shadow: 0 1px 2px rgb(28 28 26 / 6%), 0 4px 14px rgb(28 28 26 / 6%);
+  --shadow-up: 0 2px 4px rgb(28 28 26 / 8%), 0 12px 32px rgb(28 28 26 / 12%);
+  --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236d6c66' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141413; --bar: #1a1a19; --fg: #ecebe7; --muted: #a3a29b; --faint: #77766f; --line: #2c2c29; --line-strong: #3d3d39;
+    --card: #1f1f1d; --well: #262624; --accent: #8fb0f7; --accent-fg: #10131a; --accent-soft: #1e2638;
+    --shadow: 0 1px 2px rgb(0 0 0 / 30%); --shadow-up: 0 2px 6px rgb(0 0 0 / 40%), 0 14px 36px rgb(0 0 0 / 45%);
+    --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23a3a29b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 Lato, -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", "PingFang SC", "Microsoft YaHei", sans-serif; -webkit-font-smoothing: antialiased; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---- header: the name, the search box and the language on one line; the question; then the filters */
+header { background: var(--bar); border-bottom: 1px solid var(--line); }
+header > div { max-width: 1320px; margin: 0 auto; padding: 14px 24px 16px; }
+.bar { display: flex; align-items: center; gap: 16px; }
+.brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 900; font-size: 15px; white-space: nowrap; }
+.brand svg { display: block; color: var(--accent); }
+.bar .space { flex: 1; }
+#search:not([hidden]) + .space { display: none; }
+#search { flex: 1; display: flex; gap: 8px; max-width: 720px; margin: 0 auto; }
+.qwrap { position: relative; flex: 1; min-width: 0; }
+.qwrap svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--faint); pointer-events: none; }
+#qbox { width: 100%; height: 44px; background: var(--card); border: 1px solid var(--line-strong); border-radius: 999px; padding: 0 18px 0 42px; font-size: 16px; transition: border-color .15s, box-shadow .15s; }
+#qbox::placeholder { color: var(--faint); }
+#qbox:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+#go { height: 44px; padding: 0 22px; border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-fg); font-weight: 700; cursor: pointer; transition: filter .15s; }
+#go:hover { filter: brightness(1.08); }
+#go:disabled { opacity: .6; cursor: progress; }
+select { appearance: none; -webkit-appearance: none; background: var(--card) var(--chev) no-repeat right 11px center; border: 1px solid var(--line); border-radius: 8px; padding: 5px 30px 5px 11px; font-size: 13px; cursor: pointer; }
+select:hover { border-color: var(--line-strong); }
+.head { margin-top: 18px; }
+#q { font-size: 26px; font-weight: 900; line-height: 1.25; letter-spacing: -.01em; overflow-wrap: anywhere; }
+#q:empty { display: none; }
+#sub { color: var(--muted); font-size: 14px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+#q:empty + #sub { font-size: 17px; color: var(--fg); margin-top: 6px; }
+#dates { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; font-size: 13px; }
+#dates button, #more { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 5px 13px; cursor: pointer; white-space: nowrap; transition: border-color .15s, background .15s; }
+#dates button:hover, #more:hover { border-color: var(--line-strong); }
+#dates button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+#chips { display: contents; }
+#tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+#tools label { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+#range { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+#tools select { color: var(--fg); }
+
+/* ---- the grid of matches: the best one gets a row of its own */
+main { max-width: 1320px; margin: 0 auto; padding: 24px; }
+#empty { color: var(--muted); font-size: 16px; text-align: center; padding: 48px 0; margin: 0; }
+#grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 22px; transition: opacity .2s; }
+body:has(#go:disabled) #grid { opacity: .45; }
+figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; cursor: zoom-in; box-shadow: var(--shadow); transition: box-shadow .2s, transform .2s, border-color .2s; }
+figure:hover { box-shadow: var(--shadow-up); transform: translateY(-2px); border-color: var(--line-strong); }
+.pic { position: relative; overflow: hidden; background: var(--well); }
+.pic img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; transition: transform .45s cubic-bezier(.2, .7, .2, 1); }
+figure:hover .pic img { transform: scale(1.045); }
+/* a hint that a card opens the viewer, with the screens before and after it */
+.more { position: absolute; right: 10px; bottom: 10px; padding: 5px 12px; border-radius: 999px; background: rgb(20 20 19 / 78%); color: #fff; font-size: 12px; font-weight: 700; opacity: 0; transform: translateY(4px); transition: opacity .2s, transform .2s; pointer-events: none; }
+figure:hover .more, figure:focus-visible .more { opacity: 1; transform: none; }
+@media (hover: none) { .more { opacity: 1; transform: none; } }
+figcaption { padding: 11px 14px 13px; font-size: 13px; min-width: 0; }
+figcaption .when { display: flex; align-items: baseline; gap: 8px; min-width: 0; white-space: nowrap; }
+.when .time { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.when .day { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+.where { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+#more { display: block; margin: 32px auto 8px; padding: 9px 22px; font-size: 14px; font-weight: 700; }
+
+/* ---- the viewer: one screenshot large, the frames around it below */
+#viewer { border: 0; padding: 0; margin: 0; width: 100vw; height: 100vh; max-width: none; max-height: none; background: #0f0f0e; color: #ecebe7; }
+#viewer::backdrop { background: #0f0f0e; }
+#viewer[open] { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; animation: fade .18s ease-out; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.vtop { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid #262624; min-width: 0; }
+.vtop .meta { flex: 1; min-width: 0; }
+.vtop .when { font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; }
+.vtop .where { color: #9d9c95; font-size: 13px; }
+#vcount { color: #9d9c95; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.vtop a, .vtop button { color: inherit; background: #1f1f1d; text-decoration: none; padding: 7px 14px; border: 1px solid #353532; border-radius: 999px; font-size: 13px; white-space: nowrap; cursor: pointer; transition: background .15s; }
+.vtop a:hover, .vtop button:hover { background: #2a2a28; }
+.stage { position: relative; display: flex; align-items: center; justify-content: center; padding: 20px 72px; min-height: 0; }
+.stage img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; border-radius: 6px; box-shadow: 0 10px 40px rgb(0 0 0 / 50%); }
+.nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; padding: 0; border: 1px solid #353532; border-radius: 50%; background: rgb(31 31 29 / 85%); color: #ecebe7; font-size: 24px; line-height: 1; cursor: pointer; transition: background .15s; }
+.nav:hover:not(:disabled) { background: #2f2f2c; }
+.nav:disabled { opacity: .25; cursor: default; }
+.nav.prev { left: 16px; } .nav.next { right: 16px; }
+.strip { display: flex; align-items: flex-end; gap: 10px; overflow-x: auto; padding: 12px 20px 16px; border-top: 1px solid #262624; scrollbar-width: thin; scrollbar-color: #3a3a37 transparent; }
+.tick { flex: 0 0 auto; width: 148px; padding: 4px 4px 0; border: 0; background: none; color: #8b8a84; text-align: left; cursor: pointer; opacity: .7; transition: opacity .15s; }
+.tick:hover { opacity: 1; }
+.tick img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; border-radius: 6px; background: #1f1f1d; outline: 2px solid transparent; outline-offset: 2px; transition: outline-color .15s; }
+.tick span { display: block; font-size: 12px; padding: 6px 2px 0; font-variant-numeric: tabular-nums; }
+.tick.active { opacity: 1; color: #ecebe7; }
+.tick.active img { outline-color: #ecebe7; }
+.tick.hit span::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #8fb0f7; margin-right: 6px; vertical-align: 1px; }
+.gap { flex: 0 0 auto; align-self: stretch; display: flex; align-items: center; color: #7d7c76; font-size: 12px; border-left: 1px dashed #3a3a37; padding-left: 10px; white-space: nowrap; }
+html, body { overflow-x: hidden; }
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+@media (max-width: 760px) {
+}
+@media (max-width: 640px) {
+  header > div { padding: 12px 16px 14px; }
+  .bar { flex-wrap: wrap; gap: 10px 12px; }
+  .bar .space { display: block !important; }
+  #search { order: 3; flex: 1 0 100%; }
+  #go { padding: 0 16px; }
+  #q { font-size: 21px; }
+  main { padding: 16px; }
+  #grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .vtop { padding: 10px 14px; flex-wrap: wrap; } .vtop .meta { flex: 1 0 100%; }
+  .stage { padding: 8px; } .nav { display: none; } .tick { width: 108px; }
+  /* the date chips get a row of their own, above From and To, that scrolls sideways */
+  #chips { display: flex; order: -1; flex: 1 0 100%; min-width: 0; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; position: relative; }
+  #dates button { flex: 0 0 auto; white-space: nowrap; }
+}
+</style>
+</head>
+<body>
+<header><div>
+  <div class="bar">
+    <span class="brand"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="1.5" y="3" width="17" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 18h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>StreamEmbed</span>
+    <form id="search" hidden><span class="qwrap"><svg width="17" height="17" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="qbox" type="search" autocomplete="off"></span><button type="submit" id="go"></button></form>
+    <span class="space"></span>
+    <select id="lang" aria-label="Language">
+      <option value="en">English</option><option value="ko">한국어</option><option value="zh">中文</option>
+    </select>
+  </div>
+  <div class="head"><div id="q"></div><div id="sub"></div></div>
+  <div id="dates">
+    <button type="button" id="alldates"></button>
+    <span id="chips"></span>
+  </div>
+  <div id="tools" hidden>
+    <span id="range"><label><span id="lfrom"></span> <select id="from"></select></label>
+      <label><span id="lto"></span> <select id="to"></select></label></span>
+    <label id="sortby"><span id="lsort"></span> <select id="sort"><option value="match"></option><option value="new"></option><option value="old"></option></select></label>
+  </div>
+</div></header>
+<main>
+  <p id="empty" hidden></p>
+  <div id="grid"></div>
+  <button type="button" id="more" hidden></button>
+</main>
+<dialog id="viewer">
+  <div class="vtop">
+    <div class="meta"><div class="when" id="vwhen"></div><div class="where" id="vwhere"></div></div>
+    <span id="vcount"></span>
+    <a id="vopen" target="_blank" rel="noopener"></a>
+    <button type="button" id="vclose"></button>
+  </div>
+  <div class="stage">
+    <button type="button" class="nav prev" id="vprev">&#8249;</button>
+    <img id="vimg" alt="">
+    <button type="button" class="nav next" id="vnext">&#8250;</button>
+  </div>
+  <div class="strip" id="vstrip"></div>
+</dialog>
+<script>
+let DATA = /*DATA*/null;
+const LIVE = /*LIVE*/null;          // {token}: served by the background capture, which can search; null: a page written to a file
+const $ = (id) => document.getElementById(id);
+
+// ---- language: every text and every date follows the chosen language (English by default), kept in this browser
+const TEXT = {
+  en: { results: "Results", count: (a, b) => `${a} of ${b} results`, on: (d) => ` on ${d}`, fromTo: (a, b) => ` from ${a} to ${b}`,
+        fromOn: (a) => ` from ${a} on`, upTo: (b) => ` up to ${b}`, searched: (w) => ` · searched ${w}`, to: "to", from: "From", until: "to",
+        all: "All dates", none: "No results.",
+        noneHere: (n) => `No results from these dates. All dates shows ${n}.`, more: "Show more", full: "Full size", close: "Close",
+        earlier: "Earlier frame", later: "Later frame", viewer: "Screenshot viewer", match: (s) => `match ${s}`,
+        nearby: (n, m) => `${n} more within ${m} min`, onScreen: (s) => `on screen ${s}`, before: (s) => `${s} before the match`,
+        after: (s) => `${s} after the match`, openMatch: (s) => `Open the match from ${s}`, s: "s", min: "min", h: "h", days: "days",
+        ask: "Describe a screen you saw", go: "Search", searching: "Searching…", failed: (m) => `Search failed: ${m}`,
+        start: (n) => `Search ${n} screens: describe what you saw.`, screenshot: "Screenshot", seeMore: "See nearby screens", language: "Language",
+        sort: "Sort", byMatch: "Best match", newest: "Newest first", oldest: "Oldest first" },
+  ko: { results: "결과", count: (a, b) => `결과 ${b}개 중 ${a}개`, on: (d) => ` · ${d}`, fromTo: (a, b) => ` · ${a}부터 ${b}까지`,
+        fromOn: (a) => ` · ${a}부터`, upTo: (b) => ` · ${b}까지`, searched: (w) => ` · 검색 기간 ${w}`, to: "~", from: "기간", until: "~",
+        all: "모든 날짜", none: "결과가 없어요.",
+        noneHere: (n) => `이 날짜에는 결과가 없어요. 모든 날짜로 보면 ${n}개예요.`, more: "더 보기", full: "원본 크기", close: "닫기",
+        earlier: "이전 화면", later: "다음 화면", viewer: "스크린샷 보기", match: (s) => `일치도 ${s}`,
+        nearby: (n, m) => `${m}분 안에 ${n}개 더`, onScreen: (s) => `${s} 동안 화면에 있음`, before: (s) => `결과보다 ${s} 전`,
+        after: (s) => `결과보다 ${s} 후`, openMatch: (s) => `${s} 결과 열기`, s: "초", min: "분", h: "시간", days: "일",
+        ask: "본 화면을 설명해 주세요", go: "검색", searching: "검색 중…", failed: (m) => `검색 실패: ${m}`,
+        start: (n) => `화면 ${n}장에서 검색해요. 본 화면을 설명해 주세요.`, screenshot: "스크린샷", seeMore: "앞뒤 화면 보기", language: "언어",
+        sort: "정렬", byMatch: "관련도순", newest: "최신순", oldest: "오래된순" },
+  zh: { results: "结果", count: (a, b) => `共 ${b} 个结果，显示 ${a} 个`, on: (d) => ` · ${d}`, fromTo: (a, b) => ` · ${a} 至 ${b}`,
+        fromOn: (a) => ` · ${a} 起`, upTo: (b) => ` · 至 ${b}`, searched: (w) => ` · 搜索范围 ${w}`, to: "至", from: "日期", until: "至",
+        all: "全部日期", none: "没有结果。",
+        noneHere: (n) => `这些日期没有结果。全部日期共有 ${n} 个。`, more: "显示更多", full: "原始大小", close: "关闭",
+        earlier: "上一张", later: "下一张", viewer: "截图查看", match: (s) => `匹配度 ${s}`,
+        nearby: (n, m) => `${m} 分钟内另有 ${n} 个`, onScreen: (s) => `在屏幕上 ${s}`, before: (s) => `比结果早 ${s}`,
+        after: (s) => `比结果晚 ${s}`, openMatch: (s) => `打开 ${s} 的结果`, s: "秒", min: "分钟", h: "小时", days: "天",
+        ask: "描述你看到的画面", go: "搜索", searching: "搜索中…", failed: (m) => `搜索失败：${m}`,
+        start: (n) => `在 ${n} 张截图中搜索：描述你看到的画面。`, screenshot: "截图", seeMore: "查看前后画面", language: "语言",
+        sort: "排序", byMatch: "相关度", newest: "最新优先", oldest: "最早优先" },
+};
+const LOCALES = { en: "en-US", ko: "ko-KR", zh: "zh-CN" };
+let LANG = "en";
+try { const saved = localStorage.getItem("streamembed.lang"); if (saved in TEXT) LANG = saved; } catch (e) {}
+const ASKED = new URL(location.href).searchParams.get("lang");      // ?lang=ko picks (and keeps) a language
+if (ASKED in TEXT) { LANG = ASKED; try { localStorage.setItem("streamembed.lang", LANG); } catch (e) {} }
+const T = () => TEXT[LANG];
+const loc = () => LOCALES[LANG];
+const clock = (ts) => new Date(ts * 1000).toLocaleTimeString(loc(), { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+const day = (ts) => new Date(ts * 1000).toLocaleDateString(loc(), { weekday: "short", year: "numeric", month: "short", day: "numeric" });
+const stamp = (ts) => `${day(ts)} · ${clock(ts)}`;
+const shortDay = (ts) => { const d = new Date(ts * 1000); return d.toLocaleDateString(loc(), { weekday: "short", month: "short", day: "numeric", year: d.getFullYear() === new Date().getFullYear() ? undefined : "numeric" }); };
+const hm = (ts) => new Date(ts * 1000).toLocaleTimeString(loc(), { hour: "2-digit", minute: "2-digit" });
+function span(s) {
+  const t = T(), sep = LANG === "en" ? " " : "";
+  if (s < 90) return `${Math.round(s)}${sep}${t.s}`;
+  if (s < 5400) return `${Math.round(s / 60)}${sep}${t.min}`;
+  if (s < 172800) return `${(s / 3600).toFixed(1)}${sep}${t.h}`;
+  return `${Math.round(s / 86400)}${sep}${t.days}`;
+}
+// A folder screenshot: its folder and name ("trip/Screenshot ....png"); the full path is in the title. Live captures have none.
+const where = (f) => (f.source ? f.source.split(/[\\/]/).slice(-2).join("/") : "");
+const GAP_S = 120;
+
+// Date filter: the page holds every result passed in (best first); the chosen dates keep those whose screen is from then.
+const PAGE = 10;
+const pad = (n) => String(n).padStart(2, "0");
+const ymd = (ts) => { const d = new Date(ts * 1000); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+const hitTs = (r) => r.frames.find((x) => x.id === r.id).ts;
+// the date controls always give the year: a range can cross one
+const yearDay = (k) => new Date(k + "T12:00").toLocaleDateString(loc(), { year: "numeric", month: "short", day: "numeric" });
+const chipDay = (k) => { const d = new Date(k + "T12:00"); return d.toLocaleDateString(loc(), { month: "short", day: "numeric", year: d.getFullYear() === new Date().getFullYear() ? undefined : "numeric" }); };
+const midnight = (ts) => { const d = new Date(ts * 1000); return d.getHours() === 0 && d.getMinutes() === 0 && d.getSeconds() === 0; };
+function windowText(a, b) {          // whole days as days ("Nov 6", "Nov 3 to Nov 5"), else to the minute
+  const to = T().to;
+  if (a && b && midnight(a) && midnight(b)) {
+    const first = ymd(a), last = ymd(b - 1);
+    return first === last ? chipDay(first) : `${chipDay(first)} ${to} ${chipDay(last)}`;
+  }
+  if (a && b && ymd(a) === ymd(b)) return `${day(a)} · ${hm(a)} ${to} ${hm(b)}`;
+  const at = (ts) => `${day(ts)} · ${hm(ts)}`;
+  return a && b ? `${at(a)} ${to} ${at(b)}` : a ? T().fromOn(at(a)).replace(/^ · | /, "") : T().upTo(at(b)).replace(/^ · | /, "");
+}
+
+// A match from the same screen within FOLD_S of a better one is left out: it is the same work, captured again a minute later, and
+// the better one's viewer shows the frames around it. fold is null for folder screenshots with no time in their file name, which are
+// never left out this way.
+const FOLD_S = 300;
+const CHIPS = 5;
+let CARDS = [], DAYS = [], counts = {};
+const SORTS = ["match", "new", "old"];
+let SORT = "match";
+try { const saved = localStorage.getItem("streamembed.sort"); if (SORTS.includes(saved)) SORT = saved; } catch (e) {}
+const F = { from: "", to: "", shown: PAGE };
+
+function load(data) {
+  DATA = data;
+  CARDS = []; counts = {};
+  (DATA ? DATA.results : []).forEach((r0) => {
+    const r = Object.assign({}, r0, { frames: r0.frames.slice() });
+    const t = hitTs(r), near = r.fold === null ? null : CARDS.find((c) => c.fold === r.fold && Math.abs(hitTs(c) - t) < FOLD_S);
+    if (!near) CARDS.push(Object.assign(r, { hits: { [r.id]: r.score } }));     // results come best first
+  });
+  CARDS.forEach((r) => { const k = ymd(hitTs(r)); counts[k] = (counts[k] || 0) + 1; });
+  DAYS = Object.keys(counts).sort().reverse();
+  F.from = F.to = ""; F.shown = PAGE;
+  texts();
+}
+
+// Everything that depends on the language; run on load and when the language changes.
+function texts() {
+  const t = T();
+  document.documentElement.lang = LANG;
+  $("lang").value = LANG; $("lang").setAttribute("aria-label", t.language);
+  $("qbox").placeholder = t.ask; $("go").textContent = t.go;
+  $("alldates").textContent = t.all; $("more").textContent = t.more;
+  $("vopen").textContent = t.full; $("vclose").textContent = t.close; $("viewer").setAttribute("aria-label", t.viewer);
+  $("vprev").setAttribute("aria-label", t.earlier); $("vnext").setAttribute("aria-label", t.later);
+  $("q").textContent = DATA && DATA.query ? `"${DATA.query}"` : LIVE ? "" : t.results;
+  // one chip per day with results, at most the CHIPS most recent; older days are picked with From and To. Results from one day only: no date bar.
+  $("dates").hidden = DAYS.length < 2;
+  $("chips").replaceChildren(...DAYS.slice(0, CHIPS).map((k) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.dataset.day = k;
+    b.textContent = `${yearDay(k)} (${counts[k]})`;
+    b.title = day(new Date(k + "T12:00").getTime() / 1000);
+    b.onclick = () => { F.from = F.to = k; F.shown = PAGE; render(); };
+    return b;
+  }));
+  // the range: two lists of the days with results, oldest first; the sort order
+  $("lfrom").textContent = t.from; $("lto").textContent = t.until; $("lsort").textContent = t.sort;
+  const opts = () => DAYS.slice().reverse().map((k) => { const o = document.createElement("option"); o.value = k; o.textContent = yearDay(k); return o; });
+  $("from").replaceChildren(...opts()); $("to").replaceChildren(...opts());
+  const so = $("sort").options; so[0].textContent = t.byMatch; so[1].textContent = t.newest; so[2].textContent = t.oldest;
+  $("tools").hidden = CARDS.length < 2;
+  $("range").hidden = DAYS.length < 2;
+  render();
+}
+
+function render() {
+  const t = T();
+  const keep = CARDS.filter((r) => { const k = ymd(hitTs(r)); return (!F.from || k >= F.from) && (!F.to || k <= F.to); });
+  if (SORT !== "match") keep.sort((a, b) => (SORT === "new" ? hitTs(b) - hitTs(a) : hitTs(a) - hitTs(b)));   // else best first
+  if (DAYS.length) { $("from").value = F.from || DAYS[DAYS.length - 1]; $("to").value = F.to || DAYS[0]; }
+  $("sort").value = SORT;
+  const shown = keep.slice(0, F.shown);
+  $("alldates").setAttribute("aria-pressed", String(!F.from && !F.to));
+  $("chips").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(F.from === b.dataset.day && F.to === b.dataset.day)));
+  const range = !F.from && !F.to ? "" : F.from === F.to ? t.on(chipDay(F.from))
+    : F.from && F.to ? t.fromTo(chipDay(F.from), chipDay(F.to)) : F.from ? t.fromOn(chipDay(F.from)) : t.upTo(chipDay(F.to));
+  const w = DATA && DATA.window && (DATA.window[0] || DATA.window[1]) ? t.searched(windowText(DATA.window[0], DATA.window[1])) : "";
+  if (!DATA && LIVE) {
+    $("sub").textContent = LIVE.screens != null ? t.start(LIVE.screens.toLocaleString(loc())) : "";
+  } else {
+    $("sub").textContent = `${t.count(shown.length, keep.length)}${range}${w}`;
+  }
+  $("empty").hidden = !DATA || keep.length > 0;
+  $("empty").textContent = CARDS.length ? t.noneHere(CARDS.length) : t.none;
+  // on a phone the chips scroll sideways: bring the chosen one into view (the box only scrolls there)
+  const box = $("chips"), on = box.querySelector('button[aria-pressed="true"]');
+  if (on && box.scrollWidth > box.clientWidth) box.scrollLeft = on.offsetLeft - (box.clientWidth - on.offsetWidth) / 2;
+  $("more").hidden = shown.length >= keep.length;
+  $("grid").replaceChildren(...shown.map(card));
+}
+
+function card(r) {
+  const t = T(), f = r.frames.find((x) => x.id === r.id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const fig = el("figure");
+  const pic = el("div", "pic"), img = el("img");
+  img.loading = "lazy"; img.src = f.thumb; img.alt = where(f) || t.screenshot;
+  pic.append(img, el("span", "more", t.seeMore));
+  const cap = el("figcaption");
+  // the time, the day beside it
+  const when = el("div", "when");
+  when.append(el("span", "time", hm(f.ts)), el("span", "day", shortDay(f.ts)));
+  when.title = t.match(r.score.toFixed(3));
+  const w = el("div", "where", where(f)); if (f.source) w.title = f.source;
+  cap.append(when); if (where(f)) cap.append(w);
+  fig.append(pic, cap);
+  fig.tabIndex = 0; fig.setAttribute("role", "button");
+  fig.setAttribute("aria-label", t.openMatch(stamp(f.ts)));
+  fig.onclick = () => open(r);
+  fig.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(r); } };
+  return fig;
+}
+
+$("alldates").onclick = () => { F.from = F.to = ""; F.shown = PAGE; render(); };
+$("more").onclick = () => { F.shown += PAGE; render(); };
+// A range from the first to the last day with results is all dates. A start after the end moves the end, and the other way round.
+function setRange(changed) {
+  let a = $("from").value, b = $("to").value;
+  if (a > b) { if (changed === "from") b = a; else a = b; }
+  const all = a === DAYS[DAYS.length - 1] && b === DAYS[0];
+  F.from = all ? "" : a; F.to = all ? "" : b; F.shown = PAGE; render();
+}
+$("from").onchange = () => setRange("from");
+$("to").onchange = () => setRange("to");
+$("sort").onchange = (e) => {
+  SORT = e.target.value; F.shown = PAGE;
+  try { localStorage.setItem("streamembed.sort", SORT); } catch (err) {}
+  render();
+};
+$("lang").onchange = (e) => {
+  LANG = e.target.value;
+  try { localStorage.setItem("streamembed.lang", LANG); } catch (err) {}
+  const keepF = Object.assign({}, F);
+  texts(); Object.assign(F, keepF); render();
+  if ($("viewer").open) { renderStrip(); show(); }
+};
+
+// ---- the served page: a search box that asks the background capture, which has the model loaded
+// when: {since, until} from the link `streamembed search --since/--until` opens; a question typed here searches every date.
+async function search(q, when) {
+  const t = T();
+  if (!q.trim()) return;
+  $("go").disabled = true; $("sub").textContent = t.searching;
+  try {
+    const range = Object.entries(when || {}).filter(([, v]) => v).map(([k, v]) => `&${k}=${encodeURIComponent(v)}`).join("");
+    const r = await fetch(`api/search?t=${encodeURIComponent(LIVE.token)}&q=${encodeURIComponent(q)}${range}`);
+    const data = await r.json();
+    if (!r.ok || data.error) throw new Error(data.error || r.statusText);
+    const u = new URL(location.href); u.searchParams.set("q", q);
+    if (!when) { u.searchParams.delete("since"); u.searchParams.delete("until"); }
+    history.replaceState(null, "", u);
+    document.title = `${q} – StreamEmbed`;          // capture.page_title: the capture finds this window by its title
+    load(data);
+  } catch (e) {
+    $("sub").textContent = t.failed(e.message);
+  } finally {
+    $("go").disabled = false;
+  }
+}
+if (LIVE) {
+  $("search").hidden = false;
+  $("search").onsubmit = (e) => { e.preventDefault(); search($("qbox").value); };
+  const q = new URL(location.href).searchParams.get("q");
+  load(DATA);
+  const P = new URL(location.href).searchParams;           // `streamembed search "q"` opens the page with q: searched as if typed
+  if (q) { $("qbox").value = q; search(q, { since: P.get("since"), until: P.get("until") }); } else { $("qbox").focus(); }
+  // While this page is shown, the capture paints its window gray (not the windows in front of it): otherwise the next search would
+  // find this page's own thumbnails. It says where it is every second (the capture forgets it after 4 s) and at once when it is
+  // resized, focused or hidden.
+  const PAGE_ID = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const front = (e) => {
+    const shown = document.visibilityState === "visible" && !(e && e.type === "pagehide");
+    const where = shown ? `&x=${screenX}&y=${screenY}&w=${outerWidth}&h=${outerHeight}&dpr=${devicePixelRatio}&focus=${document.hasFocus() ? 1 : 0}`
+                        : "&off=1";
+    fetch(`api/front?t=${encodeURIComponent(LIVE.token)}&id=${PAGE_ID}${where}`, { keepalive: true, cache: "no-store" }).catch(() => {});
+  };
+  front();
+  setInterval(front, 1000);
+  for (const ev of ["focus", "blur", "resize", "pagehide", "pageshow"]) addEventListener(ev, front);
+  document.addEventListener("visibilitychange", front);
+} else {
+  load(DATA);
+}
+
+// ---- the viewer
+const V = { r: null, i: 0 };
+function open(r) {
+  V.r = r; V.i = Math.max(0, r.frames.findIndex((f) => f.id === r.id));
+  renderStrip(); $("viewer").showModal(); show();       // after showModal: the strip can only scroll to the match once it is shown
+}
+function renderStrip() {
+  const fr = V.r.frames, items = [];
+  fr.forEach((f, k) => {
+    if (k > 0) {
+      const p = fr[k - 1], dt = f.ts - p.ts_last;
+      if (dt > GAP_S || day(f.ts) !== day(p.ts) || f.pos !== p.pos + 1) {      // a pause, a new day, or frames left out
+        const g = document.createElement("div");
+        g.className = "gap"; g.textContent = day(f.ts) !== day(p.ts) ? day(f.ts) : `+${span(dt)}`;
+        items.push(g);
+      }
+    }
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tick" + (f.id in V.r.hits ? " hit" : ""); b.dataset.k = k;
+    b.title = [clock(f.ts), where(f)].filter(Boolean).join(" · ");
+    const img = document.createElement("img"); img.loading = "lazy"; img.src = f.thumb; img.alt = "";
+    const t = document.createElement("span"); t.textContent = clock(f.ts);
+    b.append(img, t); b.onclick = () => { V.i = k; show(); };
+    items.push(b);
+  });
+  $("vstrip").replaceChildren(...items);
+}
+function show() {
+  const t = T(), fr = V.r.frames, f = fr[V.i], hit = fr.find((x) => x.id === V.r.id);
+  $("vimg").src = f.url; $("vimg").alt = where(f) || t.screenshot; $("vopen").href = f.url;
+  let when = stamp(f.ts);
+  if (f.ts_last - f.ts >= 10) when += ` · ${t.onScreen(span(f.ts_last - f.ts))}`;
+  if (f.id in V.r.hits) when += ` · ${t.match(V.r.hits[f.id].toFixed(3))}`;
+  else if (hit) when += ` · ${f.ts < hit.ts ? t.before(span(hit.ts - f.ts)) : t.after(span(f.ts - hit.ts))}`;
+  $("vwhen").textContent = when; $("vwhere").textContent = where(f) || " "; $("vwhere").title = f.source || "";
+  $("vprev").disabled = V.i === 0; $("vnext").disabled = V.i === fr.length - 1;
+  $("vcount").textContent = fr.length > 1 ? `${V.i + 1} / ${fr.length}` : "";
+  $("vstrip").querySelectorAll(".tick").forEach((b) => b.classList.toggle("active", Number(b.dataset.k) === V.i));
+  $("vstrip").querySelector(".tick.active")?.scrollIntoView({ block: "nearest", inline: "center" });
+}
+function step(d) { const j = V.i + d; if (j >= 0 && j < V.r.frames.length) { V.i = j; show(); } }
+$("vprev").onclick = () => step(-1);
+$("vnext").onclick = () => step(1);
+$("vclose").onclick = () => $("viewer").close();
+// Phones: swipe the image left or right to step (the arrow buttons are hidden on narrow screens).
+let touchX = null;
+document.querySelector(".stage").addEventListener("touchstart", (e) => { touchX = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+document.querySelector(".stage").addEventListener("touchend", (e) => {
+  if (touchX === null) return;
+  const dx = e.changedTouches[0].clientX - touchX; touchX = null;
+  if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
+});
+$("viewer").addEventListener("keydown", (e) => {
+  if (e.key === "ArrowLeft") { e.preventDefault(); step(-1); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+StreamEmbed
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product includes software derived from the following projects, also licensed under the Apache License, Version 2.0:
+
+- Qwen3-VL-Embedding reference implementation (qwen3_vl_embedding.py), Qwen Team, Alibaba Cloud.
+  src/streamembed/engine/qwen_embedder.py is a trimmed copy.
+- Hugging Face Transformers, Qwen3-VL model code, The Hugging Face team and the Qwen Team.
+  src/streamembed/engine/ (vit.py, llm.py, model.py) re-implements parts of the Qwen3-VL forward pass against it.
+
+The model weights (Qwen/Qwen3-VL-Embedding-2B) are not included; they are downloaded from Hugging Face on first use under their own license.

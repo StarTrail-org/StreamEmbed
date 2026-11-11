@@ -1,0 +1,55 @@
+[project]
+name = "streamembed"
+version = "0.3.2"
+description = "Search your own screen history by describing what you saw, from screenshots, on your machine"
+readme = "PYPI.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.12"
+keywords = ["screen-history", "screenshots", "embeddings", "retrieval", "on-device"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+# The engine re-implements parts of the Qwen3-VL forward against transformers internals, so torch and transformers stay pinned
+# to the versions its outputs were checked for equality with.
+dependencies = [
+    "torch==2.8.0",
+    "torchvision==0.23.0",
+    "transformers==5.17.0",
+    "qwen-vl-utils==0.0.14",
+    "huggingface-hub>=0.30",
+    "safetensors>=0.4",
+    "numpy>=2.2",
+    "pillow>=11",
+    "mss>=9,<11",          # mss.MSS from 10.2, mss.mss before (capture._grabber)
+    "pyobjc-framework-Quartz>=10; sys_platform == 'darwin'",
+]
+
+[project.urls]
+Repository = "https://github.com/StarTrail-org/StreamEmbed"
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+# index_type="hnsw". chroma-hnswlib is hnswlib (same module and API) with prebuilt wheels; hnswlib itself ships only a source
+# package that needs a C++ compiler. It does not use OpenMP, so it can share the process with torch.
+hnsw = ["chroma-hnswlib==0.7.6"]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+streamembed = "streamembed.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/streamembed"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/streamembed", "tests", "examples", "README.md", "PYPI.md", "docs", "pyproject.toml", "LICENSE", "NOTICE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
