@@ -23,7 +23,7 @@ On an Apple M2 Pro it embeds a screenshot 2.8–3.7× faster than Qwen3-VL-Embed
 
 ## Our paper
 
-https://github.com/user-attachments/assets/c5b3deaf-8fe9-43d3-a5fe-4165eb4999db
+https://github.com/user-attachments/assets/96c22d07-b3c6-4292-8cdf-39790d98d265
 
 ## Run it on your laptop 🚀
 
@@ -42,7 +42,7 @@ uv pip install streamembed
 python run.py
 ```
 
-https://github.com/user-attachments/assets/1a951da8-13cb-4af4-87a5-3fb8109833f5
+https://github.com/user-attachments/assets/b61726b2-2e0a-4756-8ae8-9e326c1b3b63
 
 <br>
 
