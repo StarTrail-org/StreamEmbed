@@ -1,8 +1,23 @@
 <h1 align="center"><img src="assets/mascot.png" alt="StreamEmbed mascot" height="64" align="absmiddle">&nbsp;StreamEmbed</h1>
-<h3 align="center">Real-time Indexing from Pixels for Screenshot Retrieval</h3>
+<h3 align="center"><a href="https://arxiv.org/abs/2611.18516">Real-time Indexing from Pixels for Screenshot Retrieval</a></h3>
+
+<p align="center">
+  <a href="https://dayoon-ko.github.io/">Dayoon Ko</a><sup>B,S</sup>,
+  <a href="https://yichuan-w.github.io/">Yichuan Wang</a><sup>B</sup>,
+  <a href="https://starsuzi.github.io/">Soyeong Jeong</a><sup>K</sup>,
+  <a href="https://people.eecs.berkeley.edu/~jegonzal/">Joseph E. Gonzalez</a><sup>B</sup>,
+  <a href="https://vision.snu.ac.kr/gunhee/">Gunhee Kim</a><sup>S</sup>,
+  <a href="https://www.sewonmin.com/">Sewon Min</a><sup>B</sup>
+</p>
+<p align="center"><sub>
+  <sup>B</sup>University of California, Berkeley &nbsp;
+  <sup>S</sup>Seoul National University &nbsp;
+  <sup>K</sup>KAIST
+</sub></p>
 
 <div align="center">
 
+[![arXiv](https://img.shields.io/badge/arXiv-2611.18516-b31b1b.svg?logo=arxiv)](https://arxiv.org/abs/2611.18516)
 [![PyPI](https://img.shields.io/pypi/v/streamembed.svg)](https://pypi.org/project/streamembed/)
 [![Dataset](https://img.shields.io/badge/Dataset-Hugging_Face-ffd21e.svg?logo=huggingface)](https://huggingface.co/datasets/dayoon/ScreenMemEval)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
