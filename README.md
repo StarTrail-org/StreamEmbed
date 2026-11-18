@@ -42,19 +42,10 @@ https://github.com/user-attachments/assets/96c22d07-b3c6-4292-8cdf-39790d98d265
 
 ## Run it on your laptop 🚀
 
-### From the terminal
-
 ```bash
 uv tool install streamembed
 streamembed start --folder {folder}        # index the screenshots saved in {folder}, then capture every 5 s
 streamembed search "Which smartphone model did I add to my cart?"
-```
-
-### From Python
-
-```bash
-uv pip install streamembed
-python run.py
 ```
 
 https://github.com/user-attachments/assets/b61726b2-2e0a-4756-8ae8-9e326c1b3b63
