@@ -146,6 +146,40 @@ def _service_index_dir(se, given: str | None):
         return None
 
 
+def _screen_allowed(log, offset: int, timeout: float = 20.0) -> bool | None:
+    """Whether the service just started may record the screen (macOS): its first line in `log` after `offset` says so.
+    None when its first line is something else (a bad setting stops it before the check) or it wrote nothing within `timeout` s."""
+    from .service import SCREEN_ALLOWED, SCREEN_NOT_ALLOWED
+    end = time.monotonic() + timeout
+    while time.monotonic() < end:
+        try:
+            with open(log, encoding="utf-8", errors="replace") as f:
+                f.seek(offset)
+                lines = f.read().splitlines()
+        except FileNotFoundError:
+            lines = []
+        for line in lines:
+            if line in (SCREEN_ALLOWED, SCREEN_NOT_ALLOWED):
+                return line == SCREEN_ALLOWED
+            if line.startswith("streamembed service:"):
+                return None
+        time.sleep(0.2)
+    return None
+
+
+def _warn_screen_permission() -> None:
+    """The service cannot record the screen: say what to turn on, as a warning on stderr."""
+    import os
+    from .capture import SCREEN_PANE, python_app, turn_on
+    head = "Warning: the background service cannot record the screen yet, so it stopped."
+    if sys.stderr.isatty() and not os.environ.get("NO_COLOR"):
+        head = f"\033[1;33m{head}\033[0m"
+    print(f"{head}\n"
+          f"  In {SCREEN_PANE},\n"
+          f"  {turn_on(python_app())}.\n"
+          "  Then run `streamembed start` again. Only the pane's name mentions audio: nothing records sound.", file=sys.stderr)
+
+
 def _stamp(ts: float | None, default: str) -> str:
     return time.strftime("%Y-%m-%d %H:%M", time.localtime(ts)) if ts is not None else default
 
@@ -178,7 +212,12 @@ def _run(a) -> int:
     if settings:
         se.configure(**settings)
     if a.command == "start":
+        log = Path(_settings()["index_dir"]).expanduser().resolve() / "service.log"     # where install_service points the service
+        offset = log.stat().st_size if log.is_file() else 0
         path = se.install_service(interval=a.interval, monitors=a.monitors, skip_unchanged=a.skip_unchanged, directory=a.folder)
+        if sys.platform == "darwin" and _screen_allowed(log, offset) is False:
+            _warn_screen_permission()
+            return 1
         print(f"Started. It runs from now on and after every login ({path}).\nstreamembed status | pause | resume | stop")
     elif a.command == "stop":
         paused = se.service_status()["paused"]
@@ -221,8 +260,9 @@ def _run(a) -> int:
         cap = se.build_index_from_now(interval=a.interval, monitors=a.monitors, skip_unchanged=a.skip_unchanged, block=True)
         if cap.stalled:
             cap.stop(timeout=0)
+            from .capture import SCREEN_PANE
             print(f"streamembed: error: screen capture has not returned for {se.api.STALL_S:.0f} s ({_n(cap.stats['encoded'], 'screen')} "
-                  "indexed). Check System Settings > Privacy & Security > Screen Recording, then run it again.", file=sys.stderr)
+                  f"indexed). Check {SCREEN_PANE}, then run it again.", file=sys.stderr)
             return 1
         print(f"Stopped: {_n(cap.stats['encoded'], 'screen')} indexed.")
     elif a.command == "search":

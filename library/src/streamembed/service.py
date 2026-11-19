@@ -33,6 +33,8 @@ LABEL = "org.streamembed.capture"           # launchd
 UNIT = "streamembed-capture.service"        # systemd
 TASK = "StreamEmbedCapture"                 # Task Scheduler
 ENV_KEYS = ("HF_HOME", "HF_HUB_CACHE", "STREAMEMBED_MODELS")     # passed on to the service, which starts with no shell environment
+# the service's first line on macOS; `streamembed start` waits for it to warn only when capture cannot work
+SCREEN_ALLOWED, SCREEN_NOT_ALLOWED = "streamembed service: screen capture allowed", "streamembed service: screen capture not allowed"
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:
@@ -293,6 +295,9 @@ def main(argv: list[str] | None = None) -> int:
         interval = max(_coerce("interval", get_config("interval") if a.interval is None else a.interval), se.api.MIN_LIVE_INTERVAL)
     except (KeyError, ValueError, ImportError) as e:     # a bad setting: restarting would not help
         return _bad_setting(e)
+    if sys.platform == "darwin":            # first thing, so that `streamembed start` can say at once whether capture will work
+        from .capture import _preflight
+        print(SCREEN_ALLOWED if _preflight() else SCREEN_NOT_ALLOWED, flush=True)
     if a.folder:
         def interrupt(*_):
             raise KeyboardInterrupt         # build_index_from_directory stops after the screenshot in progress
@@ -312,7 +317,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         cap = se.build_index_from_now(interval=interval, monitors=monitors, skip_unchanged=a.skip_unchanged)
     except PermissionError as e:
-        print(f"streamembed service: {e} Then run `streamembed start` (or se.install_service()) again.", flush=True)
+        print(f"streamembed service: {e} To run it again: `streamembed start` (or se.install_service()).", flush=True)
         return 0                            # a clean exit: not restarted until it is installed again
     except (ValueError, NotImplementedError) as e:
         return _bad_setting(e)

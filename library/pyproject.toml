@@ -1,6 +1,6 @@
 [project]
 name = "streamembed"
-version = "0.3.2"
+version = "0.3.3"
 description = "Search your own screen history by describing what you saw, from screenshots, on your machine"
 readme = "PYPI.md"
 license = "Apache-2.0"

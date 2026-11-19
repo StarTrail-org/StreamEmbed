@@ -9,7 +9,7 @@ uv tool install streamembed      # the streamembed command, in an environment of
 uv pip install streamembed       # or into your project's environment
 ```
 
-Python 3.12 or later. The first run downloads the model (about 4 GB). On macOS, allow Screen Recording for Python when asked, then run `streamembed start` again.
+Python 3.12 or later. The first run downloads the model (about 4 GB). On macOS, allow screen capture for Python when asked (System Settings > Privacy & Security > Screen & System Audio Recording; nothing records audio, only the name mentions it). StreamEmbed opens that pane and prints what to turn on; then run `streamembed start` again.
 
 ## Quick Start
 

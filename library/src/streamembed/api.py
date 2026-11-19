@@ -28,7 +28,8 @@ import numpy as np
 from typing import Callable, Iterator
 
 from .ann import require_hnswlib
-from .capture import fit_width, folder_files, load_frames, screen_frames, screen_permission
+from .capture import (fit_width, folder_files, load_frames, open_screen_settings, screen_frames, screen_permission,
+                      screen_permission_help)
 from .gate import Gate
 from .index import INDEX_TYPES, Index
 from . import models as _models
@@ -713,9 +714,8 @@ def build_index_from_now(interval: float | None = None, duration: float | None =
                            "after 30 s." if _state["capture"].stalled else ""))
     if frames is None:
         interval = max(interval, MIN_LIVE_INTERVAL)
-        if not screen_permission():
-            raise PermissionError("Screen Recording permission is missing. Allow it for this app in System Settings > Privacy & Security "
-                                  "> Screen Recording, then run again.")
+        if not screen_permission():         # opens the pane too: the system prompt shows only the first time
+            raise PermissionError(screen_permission_help(opened=open_screen_settings()))
         frames = screen_frames(_settings()["width"], monitors)
     _index()._writable()                    # check the lock and load the model before the thread starts, so errors surface here
     try:

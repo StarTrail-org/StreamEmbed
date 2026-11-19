@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import re
+import subprocess
 import sys
 import time
 from collections import deque
@@ -168,6 +169,52 @@ def screen_permission() -> bool:
         return True
     Quartz.CGRequestScreenCaptureAccess()      # shows the system prompt
     return False
+
+
+# macOS 15 renamed the pane "Screen & System Audio Recording"; only the name changed (nothing here records audio). No command can
+# turn the permission on (it is kept in the SIP-protected TCC database), so we open the pane and say what to turn on in it.
+SCREEN_PANE = "System Settings > Privacy & Security > Screen & System Audio Recording (Screen Recording before macOS 15)"
+SCREEN_SETTINGS_URL = "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"
+TERMINALS = {"Apple_Terminal": "Terminal", "iTerm.app": "iTerm", "vscode": "Visual Studio Code (or Cursor)", "WezTerm": "WezTerm",
+             "ghostty": "Ghostty", "WarpTerminal": "Warp", "tmux": "the terminal app that runs tmux"}
+
+
+def python_app() -> str:
+    """The Python macOS lists in the pane when Python itself is asked (the background service, started by launchd): Python.app for a
+    framework build (python.org, Homebrew), else the interpreter with symlinks resolved (a venv's python links to it)."""
+    app = Path(sys.base_prefix) / "Resources" / "Python.app"
+    return str(app if app.is_dir() else Path(os.path.realpath(sys.executable)))
+
+
+def permission_app() -> str:
+    """What to turn on in the pane: macOS asks for the app that started this process, the terminal app when it runs in one."""
+    term = os.environ.get("TERM_PROGRAM")
+    return TERMINALS.get(term, term) if term else python_app()
+
+
+def turn_on(app: str) -> str:
+    """'turn on X' for the pane; a path is added with + when it is not listed yet."""
+    if not app.startswith("/"):
+        return f"turn on {app}"
+    name = Path(app).stem if app.endswith(".app") else Path(app).name       # as the pane lists it
+    return f"turn on {name}, or add it with + (press Cmd-Shift-G and paste {app})"
+
+
+def open_screen_settings() -> bool:
+    """Open the pane in System Settings (macOS). False when it could not be opened, or elsewhere."""
+    if not MACOS:
+        return False
+    try:
+        return subprocess.run(["open", SCREEN_SETTINGS_URL], capture_output=True, timeout=10).returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def screen_permission_help(opened: bool = False) -> str:
+    """How to allow screen capture, in one message. `opened`: the pane was opened (open_screen_settings)."""
+    return (f"Screen capture needs a permission that only you can give: in {SCREEN_PANE}, {turn_on(permission_app())}, then run "
+            "it again. Nothing records audio; only the pane's name mentions it. "
+            + ("System Settings is open at that pane now." if opened else f"To open the pane: open '{SCREEN_SETTINGS_URL}'"))
 
 
 def _preflight() -> bool:
@@ -387,8 +434,8 @@ def screen_frames(width: int, monitors: str | list[int] = "all",
                     took = time.monotonic() - t0
                     if took > SLOW_GRAB_S and not slow:
                         slow = True
-                        why = (" The app that started Python has no Screen Recording permission: System Settings > Privacy & "
-                               "Security > Screen Recording." if MACOS and not _preflight() else
+                        why = (f" The app that started Python has no permission to record the screen: {SCREEN_PANE}."
+                               if MACOS and not _preflight() else
                                " Another app that records the screen at the same time can slow it down.")
                         print(f"streamembed: a screen grab took {took:.0f} s.{why}", file=sys.stderr, flush=True)
                     img = Image.frombytes("RGB", shot.size, shot.rgb)                     # full size: _ingest fits it to `width`
